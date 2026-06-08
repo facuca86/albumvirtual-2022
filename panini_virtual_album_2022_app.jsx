@@ -17,7 +17,7 @@ const STICKERS_TEAM = 19;
 const TOTAL_STICKERS = 638;
 
 const teams = [
-  'FWCI',
+  'FWCI','ESTADIOS',
   'QAT','ECU','SEN','NED',
   'ENG','IRN','USA','WAL',
   'ARG','KSA','MEX','POL',
@@ -26,7 +26,7 @@ const teams = [
   'BEL','CAN','MAR','CRO',
   'BRA','SRB','SUI','CMR',
   'POR','GHA','URU','KOR',
-  'ESTADIOS','FWCH','COCA'
+  'FWCH','COCA'
 ];
 
 const teamData = {
