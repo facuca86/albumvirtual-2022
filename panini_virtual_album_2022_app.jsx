@@ -645,6 +645,12 @@ export default function PaniniAlbum2022() {
                 INTRO
               </button>
 
+              <button onClick={() => { setCurrentTeamIndex(teams.indexOf('ESTADIOS')); setCurrentView('album'); }}
+                className="col-span-2 rounded-2xl p-4 font-black text-2xl sm:text-3xl active:scale-95 transition-transform"
+                style={{ backgroundColor: '#0d2167', color: '#FFD700' }}>
+                ESTADIOS
+              </button>
+
               {Object.entries(groups).map(([letter, group]) => {
                 const isLightGroup = false;
                 const textColor = '#ffffff';
@@ -662,12 +668,6 @@ export default function PaniniAlbum2022() {
                   </button>
                 );
               })}
-
-              <button onClick={() => { setCurrentTeamIndex(teams.indexOf('ESTADIOS')); setCurrentView('album'); }}
-                className="col-span-2 rounded-2xl p-4 font-black text-2xl sm:text-3xl active:scale-95 transition-transform"
-                style={{ backgroundColor: '#0d2167', color: '#FFD700' }}>
-                ESTADIOS
-              </button>
 
               <button onClick={() => { setCurrentTeamIndex(teams.indexOf('FWCH')); setCurrentView('album'); }}
                 className="col-span-2 rounded-2xl p-4 font-black text-2xl sm:text-3xl active:scale-95 transition-transform"
