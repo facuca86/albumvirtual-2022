@@ -61,13 +61,17 @@
       const teamThemesSrc = await fetch('./teamThemes_2022.js').then(r => r.text());
       const teamThemesUrl = makeModuleUrl(teamThemesSrc);
 
+      const albumConfigSrc = await fetch('./albumConfig_2022.js').then(r => r.text());
+      const albumConfigUrl = makeModuleUrl(albumConfigSrc);
+
       const appSrc = await fetch('./panini_virtual_album_2022_app.jsx').then(r => r.text());
       const appPatched = appSrc
         .replace(/from\s+['"]react['"]/g,                          `from '${reactUrl}'`)
         .replace(/from\s+['"]firebase\/firestore['"]/g,            `from '${firebaseFirestoreUrl}'`)
         .replace(/from\s+['"]\.\/firebase_2022['"]/g,              `from '${firebaseUrl}'`)
         .replace(/from\s+['"]\.\/playerNames_2022(?:\.js)?['"]/g,  `from '${playerNamesUrl}'`)
-        .replace(/from\s+['"]\.\/teamThemes_2022(?:\.js)?['"]/g,   `from '${teamThemesUrl}'`);
+        .replace(/from\s+['"]\.\/teamThemes_2022(?:\.js)?['"]/g,   `from '${teamThemesUrl}'`)
+        .replace(/from\s+['"]\.\/albumConfig_2022(?:\.js)?['"]/g,  `from '${albumConfigUrl}'`);
       const appUrl = makeModuleUrl(transpile(appPatched, 'panini_virtual_album_2022_app.jsx'));
 
       const [{ default: PaniniAlbum2022 }, { createRoot }, React] = await Promise.all([

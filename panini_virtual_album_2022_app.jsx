@@ -2,140 +2,36 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { db, doc, getDoc, setDoc } from './firebase_2022';
 import { playerNames } from './playerNames_2022';
 import { teamThemes } from './teamThemes_2022';
+import { albumConfig } from './albumConfig_2022';
 
-const LOCAL_STORAGE_KEY = 'paniniWorldCup2022_stickers';
-const LOCAL_STORAGE_DARK_KEY = 'paniniWorldCup2022_darkMode';
+const LOCAL_STORAGE_KEY      = `${albumConfig.id}_stickers`;
+const LOCAL_STORAGE_DARK_KEY = `${albumConfig.id}_darkMode`;
 
-const ALBUM_OWNER = "Facundo";
-const VIEW_PARAM = new URLSearchParams(window.location.search).get('view');
+const ALBUM_OWNER    = albumConfig.owner;
+const VIEW_PARAM     = new URLSearchParams(window.location.search).get('view');
+const TOTAL_STICKERS = albumConfig.totalStickers;
 
-const STICKERS_FWCI = 8;
-const STICKERS_ESTADIOS = 11;
-const STICKERS_FWCH = 11;
-const STICKERS_COCA = 8;
-const STICKERS_TEAM = 19;
-const TOTAL_STICKERS = 638;
+const teams      = albumConfig.teams;
+const teamData   = albumConfig.teamData;
+const teamGroups = albumConfig.teamGroups;
+const groups     = albumConfig.groups;
 
-const teams = [
-  'FWCI','ESTADIOS',
-  'QAT','ECU','SEN','NED',
-  'ENG','IRN','USA','WAL',
-  'ARG','KSA','MEX','POL',
-  'FRA','AUS','DEN','TUN',
-  'ESP','CRC','GER','JPN',
-  'BEL','CAN','MAR','CRO',
-  'BRA','SRB','SUI','CMR',
-  'POR','GHA','URU','KOR',
-  'FWCH','COCA'
-];
+const progressDocRef = db ? doc(db, 'albumProgress', albumConfig.id) : null;
+const settingsDocRef = db ? doc(db, 'albumSettings', albumConfig.id) : null;
 
-const teamData = {
-  FWCI:     { name: 'Intro',    federation: 'Opening Section',          flag: '🏆' },
-  ESTADIOS: { name: 'Estadios', federation: 'Estadios Qatar 2022',      flag: '🏟️' },
-  FWCH:     { name: 'FIFA Museum', federation: 'World Champions',       flag: '⭐' },
-  COCA:     { name: 'Coca-Cola', federation: 'Promotional Collection',  flag: '🥤' },
-
-  QAT: { name: 'Catar',          federation: 'Qatar Football Association',                          flag: '🇶🇦' },
-  ECU: { name: 'Ecuador',        federation: 'Federación Ecuatoriana de Fútbol',                   flag: '🇪🇨' },
-  SEN: { name: 'Senegal',        federation: 'Fédération Sénégalaise de Football',                 flag: '🇸🇳' },
-  NED: { name: 'Países Bajos',   federation: 'Koninklijke Nederlandse Voetbalbond',                flag: '🇳🇱' },
-  ENG: { name: 'Inglaterra',     federation: 'The Football Association',                           flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  IRN: { name: 'Irán',           federation: 'Football Federation Islamic Republic of Iran',       flag: '🇮🇷' },
-  USA: { name: 'Estados Unidos', federation: 'U.S. Soccer Federation',                            flag: '🇺🇸' },
-  WAL: { name: 'Gales',          federation: 'Football Association of Wales',                      flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
-  ARG: { name: 'Argentina',      federation: 'Asociación del Fútbol Argentino',                   flag: '🇦🇷' },
-  KSA: { name: 'Arabia Saudita', federation: 'Saudi Arabian Football Federation',                 flag: '🇸🇦' },
-  MEX: { name: 'México',         federation: 'Federación Mexicana de Fútbol',                     flag: '🇲🇽' },
-  POL: { name: 'Polonia',        federation: 'Polski Związek Piłki Nożnej',                       flag: '🇵🇱' },
-  FRA: { name: 'Francia',        federation: 'Fédération Française de Football',                  flag: '🇫🇷' },
-  AUS: { name: 'Australia',      federation: 'Football Australia',                                 flag: '🇦🇺' },
-  DEN: { name: 'Dinamarca',      federation: 'Dansk Boldspil-Union',                              flag: '🇩🇰' },
-  TUN: { name: 'Túnez',          federation: 'Fédération Tunisienne de Football',                 flag: '🇹🇳' },
-  ESP: { name: 'España',         federation: 'Real Federación Española de Fútbol',                flag: '🇪🇸' },
-  CRC: { name: 'Costa Rica',     federation: 'Federación Costarricense de Fútbol',                flag: '🇨🇷' },
-  GER: { name: 'Alemania',       federation: 'Deutscher Fußball-Bund',                            flag: '🇩🇪' },
-  JPN: { name: 'Japón',          federation: 'Japan Football Association',                        flag: '🇯🇵' },
-  BEL: { name: 'Bélgica',        federation: 'Koninklijke Belgische Voetbalbond',                 flag: '🇧🇪' },
-  CAN: { name: 'Canadá',         federation: 'Canada Soccer Association',                         flag: '🇨🇦' },
-  MAR: { name: 'Marruecos',      federation: 'Fédération Royale Marocaine de Football',           flag: '🇲🇦' },
-  CRO: { name: 'Croacia',        federation: 'Hrvatski nogometni savez',                          flag: '🇭🇷' },
-  BRA: { name: 'Brasil',         federation: 'Confederação Brasileira de Futebol',                flag: '🇧🇷' },
-  SRB: { name: 'Serbia',         federation: 'Fudbalski savez Srbije',                            flag: '🇷🇸' },
-  SUI: { name: 'Suiza',          federation: 'Schweizerischer Fussballverband',                   flag: '🇨🇭' },
-  CMR: { name: 'Camerún',        federation: 'Fédération Camerounaise de Football',               flag: '🇨🇲' },
-  POR: { name: 'Portugal',       federation: 'Federação Portuguesa de Futebol',                   flag: '🇵🇹' },
-  GHA: { name: 'Ghana',          federation: 'Ghana Football Association',                        flag: '🇬🇭' },
-  URU: { name: 'Uruguay',        federation: 'Asociación Uruguaya de Fútbol',                     flag: '🇺🇾' },
-  KOR: { name: 'República de Corea', federation: 'Korea Football Association',                    flag: '🇰🇷' },
-};
-
-const teamGroups = {
-  QAT: { group: 'A', members: ['Catar',          'Ecuador',       'Senegal',    'Países Bajos'] },
-  ECU: { group: 'A', members: ['Catar',          'Ecuador',       'Senegal',    'Países Bajos'] },
-  SEN: { group: 'A', members: ['Catar',          'Ecuador',       'Senegal',    'Países Bajos'] },
-  NED: { group: 'A', members: ['Catar',          'Ecuador',       'Senegal',    'Países Bajos'] },
-  ENG: { group: 'B', members: ['Inglaterra',     'Irán',          'Estados Unidos','Gales'] },
-  IRN: { group: 'B', members: ['Inglaterra',     'Irán',          'Estados Unidos','Gales'] },
-  USA: { group: 'B', members: ['Inglaterra',     'Irán',          'Estados Unidos','Gales'] },
-  WAL: { group: 'B', members: ['Inglaterra',     'Irán',          'Estados Unidos','Gales'] },
-  ARG: { group: 'C', members: ['Argentina',      'Arabia Saudita','México',     'Polonia'] },
-  KSA: { group: 'C', members: ['Argentina',      'Arabia Saudita','México',     'Polonia'] },
-  MEX: { group: 'C', members: ['Argentina',      'Arabia Saudita','México',     'Polonia'] },
-  POL: { group: 'C', members: ['Argentina',      'Arabia Saudita','México',     'Polonia'] },
-  FRA: { group: 'D', members: ['Francia',        'Australia',     'Dinamarca',  'Túnez'] },
-  AUS: { group: 'D', members: ['Francia',        'Australia',     'Dinamarca',  'Túnez'] },
-  DEN: { group: 'D', members: ['Francia',        'Australia',     'Dinamarca',  'Túnez'] },
-  TUN: { group: 'D', members: ['Francia',        'Australia',     'Dinamarca',  'Túnez'] },
-  ESP: { group: 'E', members: ['España',         'Costa Rica',    'Alemania',   'Japón'] },
-  CRC: { group: 'E', members: ['España',         'Costa Rica',    'Alemania',   'Japón'] },
-  GER: { group: 'E', members: ['España',         'Costa Rica',    'Alemania',   'Japón'] },
-  JPN: { group: 'E', members: ['España',         'Costa Rica',    'Alemania',   'Japón'] },
-  BEL: { group: 'F', members: ['Bélgica',        'Canadá',        'Marruecos',  'Croacia'] },
-  CAN: { group: 'F', members: ['Bélgica',        'Canadá',        'Marruecos',  'Croacia'] },
-  MAR: { group: 'F', members: ['Bélgica',        'Canadá',        'Marruecos',  'Croacia'] },
-  CRO: { group: 'F', members: ['Bélgica',        'Canadá',        'Marruecos',  'Croacia'] },
-  BRA: { group: 'G', members: ['Brasil',         'Serbia',        'Suiza',      'Camerún'] },
-  SRB: { group: 'G', members: ['Brasil',         'Serbia',        'Suiza',      'Camerún'] },
-  SUI: { group: 'G', members: ['Brasil',         'Serbia',        'Suiza',      'Camerún'] },
-  CMR: { group: 'G', members: ['Brasil',         'Serbia',        'Suiza',      'Camerún'] },
-  POR: { group: 'H', members: ['Portugal',       'Ghana',         'Uruguay',    'Rep. de Corea'] },
-  GHA: { group: 'H', members: ['Portugal',       'Ghana',         'Uruguay',    'Rep. de Corea'] },
-  URU: { group: 'H', members: ['Portugal',       'Ghana',         'Uruguay',    'Rep. de Corea'] },
-  KOR: { group: 'H', members: ['Portugal',       'Ghana',         'Uruguay',    'Rep. de Corea'] },
-};
-
-const groups = {
-  A: { color: '#73BB6A', teams: ['QAT','ECU','SEN','NED'] },
-  B: { color: '#E30613', teams: ['ENG','IRN','USA','WAL'] },
-  C: { color: '#B8D94A', teams: ['ARG','KSA','MEX','POL'] },
-  D: { color: '#0A4E97', teams: ['FRA','AUS','DEN','TUN'] },
-  E: { color: '#E55C0B', teams: ['ESP','CRC','GER','JPN'] },
-  F: { color: '#006B63', teams: ['BEL','CAN','MAR','CRO'] },
-  G: { color: '#5B2E87', teams: ['BRA','SRB','SUI','CMR'] },
-  H: { color: '#E4326C', teams: ['POR','GHA','URU','KOR'] },
-};
-
-const progressDocRef = db ? doc(db, 'albumProgress', 'paniniWorldCup2022') : null;
-const settingsDocRef = db ? doc(db, 'albumSettings', 'paniniWorldCup2022') : null;
-
-const getThemeKey = (teamCode) => {
-  if (teamCode === 'FWCI' || teamCode === 'ESTADIOS') return 'FWCI2022';
-  if (teamCode === 'FWCH') return 'FWCH2022';
-  return teamCode;
-};
+const getThemeKey = (teamCode) =>
+  albumConfig.sectionThemes[teamCode]?.themeKey ?? teamCode;
 
 const getTeamGradientClass = (teamCode) => {
-  if (teamCode === 'COCA') return 'bg-[#e41f1f]';
-  if (teamCode === 'FWCH') return 'bg-[#7c3d00]';
-  if (teamCode === 'ESTADIOS') return 'bg-[#0d2167]';
-  const themeKey = getThemeKey(teamCode);
-  const gradient = teamThemes[themeKey]?.gradient;
+  const theme = albumConfig.sectionThemes[teamCode];
+  if (theme?.solidBg) return theme.solidBg;
+  const gradient = teamThemes[getThemeKey(teamCode)]?.gradient;
   return gradient ? `bg-gradient-to-r ${gradient}` : 'bg-white';
 };
 
 const getInnerPanelClass = (teamCode, darkMode = false) => {
-  if (teamCode === 'FWCI' || teamCode === 'ESTADIOS') return 'bg-[#1a1a2e]';
-  if (teamCode === 'FWCH') return 'bg-[#2d1500]';
+  const inner = albumConfig.sectionThemes[teamCode]?.innerPanel;
+  if (inner) return inner;
   return darkMode ? 'bg-[#1e1e30]' : 'bg-[#f7f5f2]';
 };
 
@@ -152,11 +48,12 @@ const TAILWIND_HEX = {
 };
 
 function getTeamCodes(team) {
-  if (team === 'FWCI')     return ['PANINI',...Array.from({length:7},(_,i)=>`FWC${i+1}`)];
-  if (team === 'ESTADIOS') return Array.from({length:11},(_,i)=>`FWC${i+8}`);
-  if (team === 'FWCH')     return Array.from({length:11},(_,i)=>`FWC${i+19}`);
-  if (team === 'COCA')     return Array.from({length:8},(_,i)=>`CC${i+1}`);
-  return Array.from({length:19},(_,i)=>`${team}${i+1}`);
+  const section = albumConfig.specialSections[team];
+  if (section) {
+    if (section.stickers) return section.stickers.map(s => s.code);
+    return Array.from({length: section.count}, (_, i) => `${section.codePrefix}${section.codeStart + i}`);
+  }
+  return Array.from({length: albumConfig.teamStickerCount}, (_, i) => `${team}${i + 1}`);
 }
 
 function getTeamConfettiColors(teamCode) {
@@ -167,17 +64,18 @@ function getTeamConfettiColors(teamCode) {
 }
 
 function getTeamForCode(code) {
-  if (code === 'PANINI') return 'FWCI';
-  const fwcMatch = code.match(/^FWC(\d+)$/);
-  if (fwcMatch) {
-    const n = parseInt(fwcMatch[1]);
-    if (n <= 7)  return 'FWCI';
-    if (n <= 18) return 'ESTADIOS';
-    return 'FWCH';
+  for (const [sectionCode, section] of Object.entries(albumConfig.specialSections)) {
+    if (section.stickers) {
+      if (section.stickers.some(s => s.code === code)) return sectionCode;
+    } else {
+      if (code.startsWith(section.codePrefix)) {
+        const num = parseInt(code.slice(section.codePrefix.length));
+        if (num >= section.codeStart && num < section.codeStart + section.count) return sectionCode;
+      }
+    }
   }
-  if (code.startsWith('CC')) return 'COCA';
   const m = code.match(/^([A-Z]+)\d+$/);
-  return (m && teamData[m[1]]) ? m[1] : null;
+  return (m && albumConfig.teamData[m[1]]) ? m[1] : null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -271,54 +169,30 @@ export default function PaniniAlbum2022() {
   const currentTeam     = teams[currentTeamIndex] || teams[0];
   const currentTeamInfo = teamData[currentTeam] || { name: currentTeam, federation: 'Federación Nacional de Fútbol', flag: '🏳️' };
 
-  const stickerCount =
-    currentTeam === 'FWCI'     ? STICKERS_FWCI :
-    currentTeam === 'ESTADIOS' ? STICKERS_ESTADIOS :
-    currentTeam === 'FWCH'     ? STICKERS_FWCH :
-    currentTeam === 'COCA'     ? STICKERS_COCA :
-    STICKERS_TEAM;
+  const stickerCount = albumConfig.specialSections[currentTeam]?.count ?? albumConfig.teamStickerCount;
 
   const isRepeatedSticker  = (v) => v === 'repeated';
   const isCompletedSticker = (v) => v === true || v === 'repeated';
 
   // ── Stickers memo ──────────────────────────────────────────────────────────
   const stickers = useMemo(() => {
+    const section = albumConfig.specialSections[currentTeam];
     return Array.from({ length: stickerCount }, (_, i) => {
       const id = i + 1;
       let code, type, label, horizontal;
 
-      if (currentTeam === 'FWCI') {
-        const fwciDefs = [
-          { code: 'PANINI', label: 'PANINI',           type: 'panini',   horizontal: false },
-          { code: 'FWC1',   label: 'Logo FIFA',         type: 'fwc',      horizontal: false },
-          { code: 'FWC2',   label: 'Copa del Mundo',    type: 'fwc',      horizontal: true  },
-          { code: 'FWC3',   label: 'Copa del Mundo',    type: 'fwc',      horizontal: true  },
-          { code: 'FWC4',   label: 'Mascota',           type: 'fwc',      horizontal: true  },
-          { code: 'FWC5',   label: 'Mascota',           type: 'fwc',      horizontal: true  },
-          { code: 'FWC6',   label: 'Logo Competición',  type: 'fwc',      horizontal: true  },
-          { code: 'FWC7',   label: 'Logo Competición',  type: 'fwc',      horizontal: true  },
-        ];
-        const def = fwciDefs[id - 1];
-        code = def.code; label = def.label; type = def.type; horizontal = def.horizontal;
-
-      } else if (currentTeam === 'ESTADIOS') {
-        code       = `FWC${id + 7}`;
-        type       = 'estadio';
-        label      = id <= 10 ? `Estadio ${id}` : 'Balón Oficial';
-        horizontal = true;
-
-      } else if (currentTeam === 'FWCH') {
-        code       = `FWC${id + 18}`;
-        type       = 'museum';
-        label      = `Copa ${id}`;
-        horizontal = false;
-
-      } else if (currentTeam === 'COCA') {
-        code       = `CC${id}`;
-        type       = 'coca';
-        label      = playerNames.CC?.[id] || `Jugador ${id}`;
-        horizontal = false;
-
+      if (section) {
+        if (section.stickers) {
+          const def = section.stickers[i];
+          code = def.code; label = def.label; type = def.type; horizontal = def.horizontal;
+        } else {
+          code       = `${section.codePrefix}${section.codeStart + i}`;
+          type       = section.type;
+          horizontal = section.horizontal;
+          label      = section.playerNamesKey
+            ? (playerNames[section.playerNamesKey]?.[id] || `Jugador ${id}`)
+            : section.getLabel(id);
+        }
       } else {
         code       = `${currentTeam}${id}`;
         type       = id === 1 ? 'shield' : 'player';
@@ -352,7 +226,7 @@ export default function PaniniAlbum2022() {
       setTimeout(() => setJustPastedCode(null), 450);
 
       const newCount = Object.entries(next)
-        .filter(([c, v]) => !c.startsWith('CC') && isCompletedSticker(v)).length;
+        .filter(([c, v]) => !c.startsWith(albumConfig.promoCodePrefix) && isCompletedSticker(v)).length;
       if (newCount === TOTAL_STICKERS) {
         setTimeout(() => setCelebration({ type: 'album' }), 350);
         return;
@@ -381,7 +255,7 @@ export default function PaniniAlbum2022() {
 
   const nextTeam = () => {
     window.scrollTo(0, 0);
-    if (currentTeam === 'COCA') { setCurrentView('home'); return; }
+    if (currentTeam === albumConfig.lastSectionCode) { setCurrentView('home'); return; }
     setCurrentTeamIndex(prev => Math.min(prev + 1, teams.length - 1));
   };
 
@@ -394,7 +268,7 @@ export default function PaniniAlbum2022() {
     const blob = new Blob([JSON.stringify(completed)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href = url; a.download = 'panini2022_backup.json'; a.click();
+    a.href = url; a.download = albumConfig.exportFileName; a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -418,59 +292,63 @@ export default function PaniniAlbum2022() {
   };
 
   // ── Stats ──────────────────────────────────────────────────────────────────
-  const completedCount     = Object.entries(completed).filter(([c,v]) => !c.startsWith('CC') && isCompletedSticker(v)).length;
+  const completedCount     = Object.entries(completed).filter(([c,v]) => !c.startsWith(albumConfig.promoCodePrefix) && isCompletedSticker(v)).length;
   const repeatedCount      = Object.values(completed).filter(isRepeatedSticker).length;
   const completionPercent  = Math.round((completedCount / TOTAL_STICKERS) * 100);
   const remainingCount     = Math.max(TOTAL_STICKERS - completedCount, 0);
 
-  const selectionTeams = teams.filter(t => !['FWCI','ESTADIOS','FWCH','COCA'].includes(t));
+  const selectionTeams = albumConfig.competingTeams;
 
-  // brillantes: 32 escudos + FWC1–FWC29
+  // brillantes: escudos de equipos competidores + figuritas especiales foil
   const shieldCodes    = selectionTeams.map(t => `${t}1`);
-  const fwcCodes       = Array.from({length:29},(_,i)=>`FWC${i+1}`);
+  const fwcCodes       = Array.from({length: albumConfig.brillanteStickerCount}, (_, i) => `${albumConfig.brillanteStickerPrefix}${i + 1}`);
   const brilliantCodes = [...shieldCodes, ...fwcCodes];
   const brilliantCompletedCount = brilliantCodes.filter(c => isCompletedSticker(completed[c])).length;
 
   const selectionStats = useMemo(() => {
-    const paniniCodes   = ['PANINI'];
-    const fwciCodes     = Array.from({length:7},(_,i)=>`FWC${i+1}`);
-    const estadioCodes  = Array.from({length:11},(_,i)=>`FWC${i+8}`);
-    const fwchCodes     = Array.from({length:11},(_,i)=>`FWC${i+19}`);
-    const cocaCodes     = Array.from({length:8},(_,i)=>`CC${i+1}`);
-    return [
-      { key:'PANINI',   emoji:'⚽', name:'PANINI',    total:1,  completed: paniniCodes.filter(c=>isCompletedSticker(completed[c])).length },
-      { key:'FWC_INTRO',emoji:'⚽', name:'FWC INTRO', total:7,  completed: fwciCodes.filter(c=>isCompletedSticker(completed[c])).length },
-      ...selectionTeams.map(team => {
-        const codes = Array.from({length:STICKERS_TEAM},(_,i)=>`${team}${i+1}`);
-        return { key:team, emoji:teamData[team]?.flag||'🏳️', name:(teamData[team]?.name||team).toUpperCase(), total:STICKERS_TEAM, completed:codes.filter(c=>isCompletedSticker(completed[c])).length };
-      }),
-      { key:'ESTADIOS', emoji:'🏟️', name:'ESTADIOS',  total:11, completed: estadioCodes.filter(c=>isCompletedSticker(completed[c])).length },
-      { key:'FWCH',     emoji:'⭐', name:'FIFA MUSEUM',total:11, completed: fwchCodes.filter(c=>isCompletedSticker(completed[c])).length },
-      { key:'COCA',     emoji:'🥤', name:'COCA-COLA', total:8,  completed: cocaCodes.filter(c=>isCompletedSticker(completed[c])).length },
-    ];
+    const result = [];
+    for (const item of albumConfig.statsConfig) {
+      if (item.key === '__TEAMS__') {
+        selectionTeams.forEach(team => {
+          const codes = getTeamCodes(team);
+          result.push({ key:team, emoji:albumConfig.teamData[team]?.flag||'🏳️', name:(albumConfig.teamData[team]?.name||team).toUpperCase(), total:codes.length, completed:codes.filter(c=>isCompletedSticker(completed[c])).length });
+        });
+      } else {
+        const codes = item.fixedCodes || Array.from({length:item.count}, (_, i) => `${item.codePrefix}${item.codeStart + i}`);
+        result.push({ key:item.key, emoji:item.emoji, name:item.name, total:codes.length, completed:codes.filter(c=>isCompletedSticker(completed[c])).length });
+      }
+    }
+    return result;
   }, [completed, selectionTeams]);
 
   // ── Search ─────────────────────────────────────────────────────────────────
   const searchIndex = useMemo(() => {
     const entries = [];
-    const fwciDefs = [
-      {code:'PANINI',label:'PANINI'},{code:'FWC1',label:'Logo FIFA'},
-      {code:'FWC2',label:'Copa del Mundo'},{code:'FWC3',label:'Copa del Mundo'},
-      {code:'FWC4',label:'Mascota'},{code:'FWC5',label:'Mascota'},
-      {code:'FWC6',label:'Logo Competición'},{code:'FWC7',label:'Logo Competición'},
-    ];
-    fwciDefs.forEach(d => entries.push({...d, team:'FWCI', teamName:'Intro FWC', teamFlag:'⚽'}));
-    for (let i=1;i<=11;i++) entries.push({code:`FWC${i+7}`,label:i<=10?`Estadio ${i}`:'Balón Oficial',team:'ESTADIOS',teamName:'Estadios',teamFlag:'🏟️'});
-    for (let i=1;i<=11;i++) entries.push({code:`FWC${i+18}`,label:`Copa ${i}`,team:'FWCH',teamName:'FIFA Museum',teamFlag:'⭐'});
-    selectionTeams.forEach(team => {
-      const info = teamData[team];
-      for (let id=1;id<=19;id++) {
-        const code  = `${team}${id}`;
-        const label = id===1 ? 'Escudo' : (playerNames[team]?.[id]||`Jugador ${id}`);
-        entries.push({code, label, team, teamName:info?.name||team, teamFlag:info?.flag||'🏳️'});
+    for (const teamCode of teams) {
+      const section = albumConfig.specialSections[teamCode];
+      const sc      = albumConfig.searchConfig?.[teamCode];
+      if (section) {
+        const codes = getTeamCodes(teamCode);
+        codes.forEach((code, i) => {
+          let label;
+          if (section.stickers)          label = section.stickers[i].label;
+          else if (section.playerNamesKey) label = playerNames[section.playerNamesKey]?.[i + 1] || `Jugador ${i + 1}`;
+          else                             label = section.getLabel(i + 1);
+          entries.push({ code, label, team: teamCode, teamName: sc?.teamName || teamCode, teamFlag: sc?.teamFlag || '🏳️' });
+        });
+      } else {
+        const info = albumConfig.teamData[teamCode];
+        for (let id = 1; id <= albumConfig.teamStickerCount; id++) {
+          entries.push({
+            code:     `${teamCode}${id}`,
+            label:    id === 1 ? 'Escudo' : (playerNames[teamCode]?.[id] || `Jugador ${id}`),
+            team:     teamCode,
+            teamName: info?.name || teamCode,
+            teamFlag: info?.flag || '🏳️',
+          });
+        }
       }
-    });
-    for (let i=1;i<=8;i++) entries.push({code:`CC${i}`,label:playerNames.CC?.[i]||`Jugador ${i}`,team:'COCA',teamName:'Coca-Cola',teamFlag:'🥤'});
+    }
     return entries;
   }, [selectionTeams]);
 
@@ -510,10 +388,10 @@ export default function PaniniAlbum2022() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-4 flex flex-row gap-2 justify-between items-center">
           <div className="min-w-0">
             <h1 className={`text-lg sm:text-3xl font-black italic truncate ${darkMode ? 'text-white' : ''}`}>
-              ÁLBUM VIRTUAL 2022
+              {albumConfig.title}
             </h1>
             <p className={`hidden sm:block text-xs uppercase tracking-[0.3em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              FIFA WORLD CUP · QATAR
+              {albumConfig.subtitle}
             </p>
             <div className={`mt-0.5 sm:mt-2 text-xs sm:text-sm font-black ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>
               {completionPercent}% COMPLETADO
@@ -706,7 +584,7 @@ export default function PaniniAlbum2022() {
             teamGroups={teamGroups}
             groups={groups}
             teamData={teamData}
-            onPrev={() => currentTeam === 'FWCI' ? setCurrentView('groups') : prevTeam()}
+            onPrev={() => currentTeam === teams[0] ? setCurrentView('groups') : prevTeam()}
             onNext={nextTeam}
             onIndex={() => setCurrentView('teams')}
           />
@@ -716,13 +594,13 @@ export default function PaniniAlbum2022() {
         {currentView === 'album' && (
           <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg transition-colors duration-300 ${darkMode ? 'bg-[#1a1a2e] border-[#2a2a4a]' : 'bg-white border-slate-200'}`}>
             <div className="flex">
-              <button onClick={() => currentTeam === 'FWCI' ? setCurrentView('groups') : prevTeam()}
+              <button onClick={() => currentTeam === teams[0] ? setCurrentView('groups') : prevTeam()}
                 className={`flex-1 py-4 font-black italic text-sm border-r active:bg-slate-100 transition-colors ${darkMode ? 'border-[#2a2a4a] text-white' : 'border-slate-200'}`}>← ANTERIOR</button>
               <button onClick={() => setCurrentView('teams')}
                 className={`flex-1 py-4 font-black uppercase text-sm border-r active:bg-slate-100 transition-colors ${darkMode ? 'border-[#2a2a4a] text-white' : 'border-slate-200'}`}>ÍNDICE</button>
               <button onClick={nextTeam}
                 className={`flex-1 py-4 font-black italic text-sm active:bg-slate-100 transition-colors ${darkMode ? 'text-white' : ''}`}>
-                {currentTeam === 'COCA' ? 'HOME' : 'SIGUIENTE →'}
+                {currentTeam === albumConfig.lastSectionCode ? 'HOME' : 'SIGUIENTE →'}
               </button>
             </div>
           </div>
@@ -779,7 +657,7 @@ function AlbumPage({ currentTeam, currentTeamInfo, stickers, stickerCount, curre
   darkMode, toggleSticker, justPastedCode, highlightCode, teamGroups, groups, teamData,
   onPrev, onNext, onIndex }) {
 
-  const isSpecial  = ['FWCI','ESTADIOS','FWCH','COCA'].includes(currentTeam);
+  const isSpecial  = currentTeam in albumConfig.specialSections;
   const isDarkTeam = isTeamDark(currentTeam);
 
   const titleColor = isDarkTeam || currentTeam === 'FWCH' || currentTeam === 'ESTADIOS'
@@ -813,7 +691,7 @@ function AlbumPage({ currentTeam, currentTeamInfo, stickers, stickerCount, curre
         </div>
         <button onClick={onNext}
           className={`rounded-full px-6 py-3 shadow font-bold italic transition-colors duration-300 ${darkMode ? 'bg-[#1a1a2e] text-white border border-[#3a3a5a]' : 'bg-white text-black'}`}>
-          {currentTeam === 'COCA' ? 'HOME' : 'SIGUIENTE →'}
+          {currentTeam === albumConfig.lastSectionCode ? 'HOME' : 'SIGUIENTE →'}
         </button>
       </div>
 
@@ -1173,24 +1051,30 @@ function QRModal({ onClose }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // RepeatidasView
 // ═══════════════════════════════════════════════════════════════════════════════
-function getPlayerNameForCode2022(code, team) {
-  if (code === 'PANINI') return 'PANINI';
-  if (code.match(/^FWC(\d+)$/)) {
-    const n = parseInt(code.replace('FWC',''));
-    if (n <= 7)  return code;
-    if (n <= 17) return `Estadio ${n-7}`;
-    if (n === 18) return 'Balón Oficial';
-    return `Copa ${n-18}`;
+function getPlayerNameForCode(code) {
+  for (const [, section] of Object.entries(albumConfig.specialSections)) {
+    if (section.stickers) {
+      const def = section.stickers.find(s => s.code === code);
+      if (def) return def.repetidasLabel ?? def.label;
+    } else {
+      if (code.startsWith(section.codePrefix)) {
+        const num = parseInt(code.slice(section.codePrefix.length));
+        if (num >= section.codeStart && num < section.codeStart + section.count) {
+          const i = num - section.codeStart + 1;
+          if (section.playerNamesKey) return playerNames[section.playerNamesKey]?.[i] || code;
+          return section.getLabel(i);
+        }
+      }
+    }
   }
-  if (team === 'COCA') {
-    const m = code.match(/^CC(\d+)$/);
-    return m ? (playerNames.CC?.[parseInt(m[1])] || code) : code;
-  }
-  const m = code.match(/^[A-Z]+(\d+)$/);
-  if (m) {
-    const id = parseInt(m[1]);
-    if (id === 1) return 'Escudo';
-    return playerNames[team]?.[id] || `Jugador ${id}`;
+  const team = getTeamForCode(code);
+  if (team) {
+    const m = code.match(/^[A-Z]+(\d+)$/);
+    if (m) {
+      const id = parseInt(m[1]);
+      if (id === 1) return 'Escudo';
+      return playerNames[team]?.[id] || `Jugador ${id}`;
+    }
   }
   return code;
 }
@@ -1244,7 +1128,7 @@ function RepeatidasView() {
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <h1 className="text-lg font-black italic uppercase text-slate-800">Figuritas repetidas de {ALBUM_OWNER}</h1>
-          <p className="text-[10px] text-slate-400 uppercase tracking-widest">FIFA World Cup 2022 · Qatar</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-widest">{albumConfig.repetidasSubtitle}</p>
         </div>
       </header>
       <main className="max-w-2xl mx-auto px-4 py-5 space-y-3">
@@ -1265,7 +1149,7 @@ function RepeatidasView() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {codes.map(code => {
-                const name = getPlayerNameForCode2022(code, team);
+                const name = getPlayerNameForCode(code);
                 return (
                   <span key={code} className="bg-slate-500 text-white text-xs font-black px-2.5 py-1 rounded-lg">
                     {code}{name !== code ? ` · ${name}` : ''}
