@@ -201,6 +201,16 @@ export default function PaniniAlbum2022() {
 
   // ── Load progress ──────────────────────────────────────────────────────────
   useEffect(() => {
+    const loadFromLocal = () => {
+      try {
+        const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (localData) {
+          const parsed = JSON.parse(localData);
+          if (parsed && typeof parsed === 'object') setCompleted(parsed);
+        }
+      } catch (_) {}
+    };
+
     const loadProgress = async () => {
       try {
         if (progressDocRef) {
@@ -213,13 +223,10 @@ export default function PaniniAlbum2022() {
             }
           }
         }
-        const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (localData) {
-          const parsed = JSON.parse(localData);
-          if (parsed && typeof parsed === 'object') setCompleted(parsed);
-        }
+        loadFromLocal();
       } catch (error) {
-        console.error('Error loading album progress:', error);
+        console.error('Error loading album progress from Firestore:', error);
+        loadFromLocal();
       } finally {
         isInitialLoad.current = false;
       }
@@ -249,11 +256,12 @@ export default function PaniniAlbum2022() {
   useEffect(() => {
     const saveProgress = async () => {
       if (isInitialLoad.current) return;
+      // Always persist locally first — independent of Firestore availability
+      try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(completed)); } catch (_) {}
       try {
         if (progressDocRef) await setDoc(progressDocRef, { stickers: completed });
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(completed));
       } catch (error) {
-        console.error('Error saving album progress:', error);
+        console.error('Error saving album progress to Firestore:', error);
       }
     };
     saveProgress();
@@ -1191,15 +1199,21 @@ function RepeatidasView() {
   const [stickerData, setStickerData] = useState(null);
 
   useEffect(() => {
+    const loadFromLocal = () => {
+      try {
+        const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+        setStickerData(local ? JSON.parse(local) : {});
+      } catch { setStickerData({}); }
+    };
+
     const load = async () => {
       try {
         if (progressDocRef) {
           const snap = await getDoc(progressDocRef);
           if (snap.exists()) { setStickerData(snap.data()?.stickers || {}); return; }
         }
-        const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-        setStickerData(local ? JSON.parse(local) : {});
-      } catch { setStickerData({}); }
+        loadFromLocal();
+      } catch { loadFromLocal(); }
     };
     load();
   }, []);
