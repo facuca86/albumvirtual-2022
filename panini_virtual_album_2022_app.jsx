@@ -300,8 +300,12 @@ export default function PaniniAlbum2022() {
   const selectionTeams = albumConfig.competingTeams;
 
   // brillantes: escudos de equipos competidores + figuritas especiales foil
+  // Los estadios (FWC8-FWC17) NO son brillantes; el Balón Oficial (FWC18) sí lo es
   const shieldCodes    = selectionTeams.map(t => `${t}1`);
-  const fwcCodes       = Array.from({length: albumConfig.brillanteStickerCount}, (_, i) => `${albumConfig.brillanteStickerPrefix}${i + 1}`);
+  const { start: exclStart, end: exclEnd } = albumConfig.brillanteStickerExclude ?? {};
+  const fwcCodes       = Array.from({length: albumConfig.brillanteStickerCount}, (_, i) => i + 1)
+    .filter(n => exclStart == null || n < exclStart || n > exclEnd)
+    .map(n => `${albumConfig.brillanteStickerPrefix}${n}`);
   const brilliantCodes = [...shieldCodes, ...fwcCodes];
   const brilliantCompletedCount = brilliantCodes.filter(c => isCompletedSticker(completed[c])).length;
 
@@ -622,7 +626,7 @@ export default function PaniniAlbum2022() {
                 </div>
               </div>
               <div>Me faltan: {remainingCount}</div>
-              <div>Brillantes: {brilliantCompletedCount} / 61</div>
+              <div>Brillantes: {brilliantCompletedCount} / {brilliantCodes.length}</div>
               <div>Repetidas: {repeatedCount}</div>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">

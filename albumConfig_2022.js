@@ -31,6 +31,8 @@ export const albumConfig = {
   // ── Figuritas brillantes (foil) ───────────────────────────────────────────────
   brillanteStickerPrefix: 'FWC',  // prefijo de los brillantes especiales
   brillanteStickerCount: 29,      // FWC1 … FWC29
+  // Los estadios (FWC8-FWC17) NO son brillantes; solo el Balón Oficial (FWC18) sí lo es
+  brillanteStickerExclude: { start: 8, end: 17 },
 
   // ── Secciones especiales (no son equipos competidores) ───────────────────────
   // Para secciones con lista explícita de figuritas, usar { count, stickers: [...] }
