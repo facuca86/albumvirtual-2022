@@ -510,7 +510,7 @@ export default function PaniniAlbum2022() {
                 return (
                   <button
                     key={proyecto.id}
-                    onClick={() => window.open(proyecto.url, '_blank')}
+                    onClick={() => { window.location.href = proyecto.url; }}
                     style={btnStyle}
                     className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-transform w-full font-black ${textClass}`}
                   >
