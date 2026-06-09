@@ -19,6 +19,27 @@ const groups     = albumConfig.groups;
 const progressDocRef = db ? doc(db, 'albumProgress', albumConfig.id) : null;
 const settingsDocRef = db ? doc(db, 'albumSettings', albumConfig.id) : null;
 
+const PROYECTOS = [
+  {
+    id: 'paniniWorldCup2026',
+    label: 'Mundial 2026',
+    url: 'https://facuca86.github.io/albumvirtual/',
+    style: 'multicolor',
+  },
+  {
+    id: 'paniniWorldCup2022',
+    label: 'Mundial 2022 · Qatar',
+    url: 'https://facuca86.github.io/albumvirtual-2022/',
+    style: 'qatar',
+  },
+  {
+    id: 'paniniCWC2025',
+    label: 'Club World Cup 2025',
+    url: 'https://facuca86.github.io/albumvirtual-cwc25/',
+    style: 'cwc',
+  },
+];
+
 const getThemeKey = (teamCode) =>
   albumConfig.sectionThemes[teamCode]?.themeKey ?? teamCode;
 
@@ -454,7 +475,7 @@ export default function PaniniAlbum2022() {
 
         {/* HOME */}
         {currentView === 'home' && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             <button onClick={() => setCurrentView('groups')}
               className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-colors duration-300 ${darkMode ? 'bg-[#1e1e30] text-white' : 'bg-white'}`}>
               <div className="text-3xl font-black italic uppercase">Explorar Álbum</div>
@@ -467,6 +488,41 @@ export default function PaniniAlbum2022() {
               className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-colors duration-300 ${darkMode ? 'bg-[#1e1e30] text-white' : 'bg-white'}`}>
               <div className="text-3xl font-black italic uppercase">Estadísticas</div>
             </button>
+            <button onClick={() => setCurrentView('otros-proyectos')}
+              className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-colors duration-300 ${darkMode ? 'bg-[#1e1e30] text-white' : 'bg-white'}`}>
+              <div className="text-3xl font-black italic uppercase">Otros Proyectos</div>
+            </button>
+          </div>
+        )}
+
+        {/* OTROS PROYECTOS */}
+        {currentView === 'otros-proyectos' && (
+          <div className={`rounded-3xl p-6 sm:p-8 shadow-xl max-w-2xl mx-auto transition-colors duration-300 ${darkMode ? 'bg-[#1e1e30] text-white' : 'bg-white'}`}>
+            <h2 className="text-3xl font-black italic uppercase mb-6">Otros Proyectos</h2>
+            <div className="flex flex-col gap-6">
+              {PROYECTOS.filter(p => p.id !== albumConfig.id).map(proyecto => {
+                const btnStyle = proyecto.style === 'multicolor'
+                  ? { background: 'linear-gradient(135deg, #e53e3e, #dd6b20, #d69e2e, #38a169, #3182ce, #805ad5)' }
+                  : proyecto.style === 'qatar'
+                  ? { backgroundColor: '#6B0F1A', border: '2px solid #B8860B' }
+                  : { backgroundColor: '#000000', border: '2px solid #B8860B' };
+                const textClass = proyecto.style === 'cwc' ? 'text-yellow-400' : 'text-white';
+                return (
+                  <button
+                    key={proyecto.id}
+                    onClick={() => window.open(proyecto.url, '_blank')}
+                    style={btnStyle}
+                    className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-transform w-full font-black ${textClass}`}
+                  >
+                    <div className="text-3xl font-black italic uppercase">{proyecto.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setCurrentView('home')}
+              className={`mt-6 px-6 py-3 rounded-2xl font-black transition-colors duration-300 ${darkMode ? 'bg-[#2a2a4a] text-white' : 'bg-gray-200 text-gray-800'}`}
+            >← VOLVER</button>
           </div>
         )}
 
