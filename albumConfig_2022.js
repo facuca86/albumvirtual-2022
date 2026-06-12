@@ -56,7 +56,7 @@ export const albumConfig = {
       codeStart: 8,
       type: 'estadio',
       horizontal: true,
-      getLabel: (i) => i <= 10 ? `Estadio ${i}` : 'Balón Oficial',
+      getLabel: (i) => i === 10 ? 'LUSAIL STADIUM' : i <= 10 ? `Estadio ${i}` : 'Balón Oficial',
     },
     FWCH: {
       count: 11,
@@ -64,7 +64,7 @@ export const albumConfig = {
       codeStart: 19,
       type: 'museum',
       horizontal: false,
-      getLabel: (i) => `Copa ${i}`,
+      getLabel: (i) => i === 2 ? 'Copa 2 - ITALIA 1938' : `Copa ${i}`,
     },
     COCA: {
       count: 8,
