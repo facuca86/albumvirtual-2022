@@ -1,3 +1,7 @@
+// Gradientes visuales por equipo — usar clases Tailwind from-/via-/to-
+// dark: true indica que el texto sobre ese fondo debe ser claro (blanco)
+// Al clonar para un nuevo torneo, respetar los colores institucionales de cada equipo
+
 export const teamThemes = {
   // Equipos presentes en 2026 — mismos gradientes
   QAT: { gradient: "from-white via-rose-400 to-red-600" },

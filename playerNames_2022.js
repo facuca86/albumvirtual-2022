@@ -1,3 +1,7 @@
+// Nombres de jugadores — editar libremente los valores string
+// El objeto exportado tiene una clave por equipo y valores "Jugador N" por defecto
+// Al clonar para un nuevo torneo, reemplazar con los nombres reales
+
 export const playerNames = {
   QAT: { 2:"Jugador 2",3:"Jugador 3",4:"Jugador 4",5:"Jugador 5",6:"Jugador 6",7:"Jugador 7",8:"Jugador 8",9:"Jugador 9",10:"Jugador 10",11:"Jugador 11",12:"Abdulaziz Hatem",13:"Jugador 13",14:"Jugador 14",15:"Jugador 15",16:"Ahmad Alaedin",17:"Hasan Al-Haydos",18:"Jugador 18",19:"Jugador 19" },
   ECU: { 2:"Jugador 2",3:"Jugador 3",4:"Jugador 4",5:"Jugador 5",6:"Pervis Estupiñan",7:"Jugador 7",8:"Jugador 8",9:"Felix Torres",10:"Jugador 10",11:"Jugador 11",12:"Jugador 12",13:"Jugador 13",14:"Jugador 14",15:"Jugador 15",16:"Jugador 16",17:"Jugador 17",18:"Jugador 18",19:"Jugador 19" },
