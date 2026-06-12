@@ -252,6 +252,30 @@ const PROYECTOS = [
     url: 'https://facuca86.github.io/albumvirtual-cwc25/',
     style: 'cwc',
   },
+  {
+    id: 'paniniRussia2018',
+    label: 'Mundial 2018 · Rusia',
+    url: 'https://facuca86.github.io/albumvirtual-2018/',
+    style: 'russia',
+  },
+  {
+    id: 'paniniBrazil2014',
+    label: 'Mundial 2014 · Brasil',
+    url: 'https://facuca86.github.io/albumvirtual-2014/',
+    style: 'brazil2014',
+  },
+  {
+    id: 'paniniSouthAfrica2010',
+    label: 'Mundial 2010 · Sudáfrica',
+    url: 'https://facuca86.github.io/albumvirtual-2010/',
+    style: 'southafrica2010',
+  },
+  {
+    id: 'paniniGermany2006',
+    label: 'Mundial 2006 · Alemania',
+    url: 'https://facuca86.github.io/albumvirtual-2006/',
+    style: 'germany2006',
+  },
 ];
 ```
 
@@ -261,20 +285,25 @@ const PROYECTOS = [
   actual **no se muestra** en la lista (no tendría sentido navegar al álbum que ya estás viendo).
 - Los botones navegan en la misma pestaña: `onClick={() => { window.location.href = proyecto.url; }}`
 
-Cada estilo tiene su tratamiento visual definido en el JSX:
+Cada estilo tiene su tratamiento visual definido en la función `getProyectoStyle(style)` del JSX,
+que devuelve un objeto de estilo inline (incluido el color de texto):
 
 | `style` | Estilos aplicados |
 |---|---|
-| `multicolor` | `background: linear-gradient(135deg, #e53e3e, #dd6b20, #d69e2e, #38a169, #3182ce, #805ad5)`, texto blanco |
-| `qatar` | `backgroundColor: '#6B0F1A'`, `border: '2px solid #B8860B'`, texto blanco |
-| `cwc` | `backgroundColor: '#000000'`, `border: '2px solid #B8860B'`, texto dorado (`text-yellow-400`) |
+| `multicolor` | `background: linear-gradient(135deg, #e53e3e, #dd6b20, #d69e2e, #38a169, #3182ce, #805ad5)`, texto `#ffffff` |
+| `qatar` | `backgroundColor: '#6B0F1A'`, `border: '2px solid #B8860B'`, texto `#ffffff` |
+| `cwc` | `backgroundColor: '#000000'`, `border: '2px solid #B8860B'`, texto `#FFD700` |
+| `russia` | `backgroundColor: '#0E4CAC'`, `border: '2px solid #D52B1E'`, texto `#ffffff` |
+| `brazil2014` | `backgroundColor: '#5FBFD8'`, `border: '2px solid #9BC43A'`, texto `#2D7B2F` |
+| `southafrica2010` | `backgroundColor: '#D6491F'`, `border: '2px solid #B92714'`, texto `#F8E4B3` |
+| `germany2006` | `backgroundColor: '#0A839C'`, `border: '2px solid #066F88'`, texto `#ffffff` |
 
 Al agregar un nuevo álbum, definir un nuevo valor de `style` con su tratamiento visual
-representativo del torneo y agregarlo al bloque de estilos del componente.
+representativo del torneo y agregarlo como un nuevo `case` dentro de `getProyectoStyle`.
 
 ### Pasos para agregar un nuevo álbum
 
 1. Agregar una nueva entrada al array `PROYECTOS` en el JSX de **cada repositorio existente**.
-2. Definir el estilo visual del nuevo álbum y agregarlo al bloque condicional de estilos del componente.
+2. Definir el estilo visual del nuevo álbum y agregarlo como un nuevo `case` en la función `getProyectoStyle`.
 3. El nuevo repositorio ya trae el array `PROYECTOS` actualizado desde su creación (fue clonado con la versión más reciente).
 4. Crear un pull request en cada repositorio con título `feat: agregar [nombre álbum] a otros proyectos`.
