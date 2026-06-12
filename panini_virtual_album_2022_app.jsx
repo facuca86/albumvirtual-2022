@@ -38,7 +38,82 @@ const PROYECTOS = [
     url: 'https://facuca86.github.io/albumvirtual-cwc25/',
     style: 'cwc',
   },
+  {
+    id: 'paniniRussia2018',
+    label: 'Mundial 2018 · Rusia',
+    url: 'https://facuca86.github.io/albumvirtual-2018/',
+    style: 'russia',
+  },
+  {
+    id: 'paniniBrazil2014',
+    label: 'Mundial 2014 · Brasil',
+    url: 'https://facuca86.github.io/albumvirtual-2014/',
+    style: 'brazil2014',
+  },
+  {
+    id: 'paniniSouthAfrica2010',
+    label: 'Mundial 2010 · Sudáfrica',
+    url: 'https://facuca86.github.io/albumvirtual-2010/',
+    style: 'southafrica2010',
+  },
+  {
+    id: 'paniniGermany2006',
+    label: 'Mundial 2006 · Alemania',
+    url: 'https://facuca86.github.io/albumvirtual-2006/',
+    style: 'germany2006',
+  },
 ];
+
+const getProyectoStyle = (style) => {
+  switch(style) {
+    case 'multicolor':
+      return {
+        background: 'linear-gradient(135deg, #e53e3e, #dd6b20, #d69e2e, #38a169, #3182ce, #805ad5)',
+        color: '#ffffff',
+      };
+    case 'qatar':
+      return {
+        backgroundColor: '#6B0F1A',
+        border: '2px solid #B8860B',
+        color: '#ffffff',
+      };
+    case 'cwc':
+      return {
+        backgroundColor: '#000000',
+        border: '2px solid #B8860B',
+        color: '#FFD700',
+      };
+    case 'russia':
+      return {
+        backgroundColor: '#0E4CAC',
+        border: '2px solid #D52B1E',
+        color: '#ffffff',
+      };
+    case 'brazil2014':
+      return {
+        backgroundColor: '#5FBFD8',
+        border: '2px solid #9BC43A',
+        color: '#2D7B2F',
+      };
+    case 'southafrica2010':
+      return {
+        backgroundColor: '#D6491F',
+        border: '2px solid #B92714',
+        color: '#F8E4B3',
+      };
+    case 'germany2006':
+      return {
+        backgroundColor: '#0A839C',
+        border: '2px solid #066F88',
+        color: '#ffffff',
+      };
+    default:
+      return {
+        backgroundColor: '#1e293b',
+        color: '#ffffff',
+      };
+  }
+};
 
 const getThemeKey = (teamCode) =>
   albumConfig.sectionThemes[teamCode]?.themeKey ?? teamCode;
@@ -501,18 +576,13 @@ export default function PaniniAlbum2022() {
             <h2 className="text-3xl font-black italic uppercase mb-6">Otros Proyectos</h2>
             <div className="flex flex-col gap-6">
               {PROYECTOS.filter(p => p.id !== albumConfig.id).map(proyecto => {
-                const btnStyle = proyecto.style === 'multicolor'
-                  ? { background: 'linear-gradient(135deg, #e53e3e, #dd6b20, #d69e2e, #38a169, #3182ce, #805ad5)' }
-                  : proyecto.style === 'qatar'
-                  ? { backgroundColor: '#6B0F1A', border: '2px solid #B8860B' }
-                  : { backgroundColor: '#000000', border: '2px solid #B8860B' };
-                const textClass = proyecto.style === 'cwc' ? 'text-yellow-400' : 'text-white';
+                const btnStyle = getProyectoStyle(proyecto.style);
                 return (
                   <button
                     key={proyecto.id}
                     onClick={() => { window.location.href = proyecto.url; }}
                     style={btnStyle}
-                    className={`rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-transform w-full font-black ${textClass}`}
+                    className="rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-transform w-full font-black"
                   >
                     <div className="text-3xl font-black italic uppercase">{proyecto.label}</div>
                   </button>
