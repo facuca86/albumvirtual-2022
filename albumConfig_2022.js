@@ -1,4 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
+// PROYECTO MADRE — ver TEMPLATE_GUIDE.md para instrucciones de clonado
+// Este archivo es la implementación de referencia para el Mundial Qatar 2022
+// Para crear un nuevo álbum: clonar el repositorio, NO modificar este archivo
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Configuración del álbum — FIFA World Cup Qatar 2022
 //
 // Para adaptar a otro torneo (Eurocopa, Copa América, Mundial de Clubes, etc.):
@@ -217,3 +223,21 @@ albumConfig.teams = [
   ...albumConfig.competingTeams,
   'FWCH', 'COCA',
 ];
+
+// ── Paleta general del álbum ─────────────────────────────────────────────────
+// Define la identidad visual dominante del álbum.
+// Al clonar para un nuevo torneo, actualizar estos valores para reflejar
+// la estética del nuevo torneo. Esta paleta se usa en el fondo general,
+// el header, los botones principales y cualquier elemento cromático global.
+export const albumPalette = {
+  name: 'Qatar 2022',
+  primary: '#7B1010',       // vinotinto — fondo general de la app
+  secondary: '#B8860B',     // dorado oscuro — acentos, bordes
+  accent: '#FFD700',        // dorado brillante — highlights, progress bar
+  headerBg: '#ffffff',      // fondo del header en modo claro
+  headerBgDark: '#1a1a2e',  // fondo del header en modo oscuro
+  darkBase: '#0f0f1a',      // fondo general en modo oscuro
+  darkCard: '#1e1e30',      // fondo de cards en modo oscuro
+  text: '#1e293b',          // texto principal modo claro
+  textDark: '#ffffff',      // texto principal modo oscuro
+};
