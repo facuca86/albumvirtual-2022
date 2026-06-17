@@ -37,5 +37,5 @@ export const playerNames = {
   KOR: { 2:"Seung-gyu Kim",3:"Hyeon-woo Jo",4:"Chul Hong",5:"Tae-hwan Kim",6:"Min-jae Kim",7:"Young-gwon Kim",8:"Jin-su Kim",9:"Yong Lee",10:"In-beom Hwang",11:"Woo-young Jung",12:"Jae-sung Lee",13:"Seung-ho Paik",14:"Gue-sung Cho",15:"Hee-chan Hwang",16:"Ui-jo Hwang",17:"Chang-hoon Kwon",18:"Heung-min Son",19:"Min-kyu Song" },
   ESTADIOS: { 8:"Ahmad Bin Ali Stadium",9:"Al Janoub Stadium",10:"Al Thumama Stadium",11:"Education City Stadium",12:"Khalifa International Stadium",13:"Stadium 974",14:"Al Bayt Stadium",15:"Al Bayt Stadium",16:"Lusail Stadium",17:"Lusail Stadium",18:"Al Rihla" },
   FWCH: { 19:"URUGUAY 1930",20:"ITALIA 1938",21:"BRASIL 1958",22:"INGLATERRA 1966",23:"BRASIL 1970",24:"ARGENTINA 1978",25:"ITALIA 1982",26:"ALEMANIA Federal 1990",27:"FRANCIA 1998",28:"ITALIA 2006",29:"FRANCIA 2018" },
-  CC: { 1:"Jugador 1",2:"Jugador 2",3:"Jugador 3",4:"Jugador 4",5:"Jugador 5",6:"Jugador 6",7:"Jugador 7",8:"Jugador 8" },
+  CC: { 1:"Serge Gnabry",2:"Emiliano Martínez",3:"Kevin De Bruyne",4:"Luka Modrić",5:"Declan Rice",6:"Gavi",7:"Hirving Lozano",8:"Heung-min Son" },
 };
