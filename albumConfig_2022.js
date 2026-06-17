@@ -62,7 +62,7 @@ export const albumConfig = {
       codeStart: 8,
       type: 'estadio',
       horizontal: true,
-      getLabel: (i) => i === 10 ? 'LUSAIL STADIUM' : i <= 10 ? `Estadio ${i}` : 'Balón Oficial',
+      getLabel: (i) => ['Ahmad Bin Ali Stadium','Al Janoub Stadium','Al Thumama Stadium','Education City Stadium','Khalifa International Stadium','Stadium 974','Al Bayt Stadium','Al Bayt Stadium','Lusail Stadium','Lusail Stadium','Al Rihla'][i-1] || `Estadio ${i}`,
     },
     FWCH: {
       count: 11,
@@ -70,7 +70,7 @@ export const albumConfig = {
       codeStart: 19,
       type: 'museum',
       horizontal: false,
-      getLabel: (i) => i === 2 ? 'Copa 2 - ITALIA 1938' : `Copa ${i}`,
+      getLabel: (i) => ['URUGUAY 1930','ITALIA 1938','BRASIL 1958','INGLATERRA 1966','BRASIL 1970','ARGENTINA 1978','ITALIA 1982','ALEMANIA Federal 1990','FRANCIA 1998','ITALIA 2006','FRANCIA 2018'][i-1] || `Copa ${i}`,
     },
     COCA: {
       count: 8,
