@@ -59,42 +59,49 @@ const PROYECTOS = [
     label: 'Mundial 2026',
     url: 'https://facuca86.github.io/albumvirtual/',
     style: 'multicolor',
+    totalStickers: 981,
   },
   {
     id: 'paniniWorldCup2022',
     label: 'Mundial 2022 · Qatar',
     url: 'https://facuca86.github.io/albumvirtual-2022/',
     style: 'qatar',
+    totalStickers: 638,
   },
   {
     id: 'paniniCWC2025',
     label: 'Club World Cup 2025',
     url: 'https://facuca86.github.io/albumvirtual-cwc25/',
     style: 'cwc',
+    totalStickers: 550,
   },
   {
     id: 'paniniRussia2018',
     label: 'Mundial 2018 · Rusia',
     url: 'https://facuca86.github.io/albumvirtual-2018/',
     style: 'russia',
+    totalStickers: 670,
   },
   {
     id: 'paniniBrazil2014',
     label: 'Mundial 2014 · Brasil',
     url: 'https://facuca86.github.io/albumvirtual-2014/',
     style: 'brazil2014',
+    totalStickers: 640,
   },
   {
     id: 'paniniSouthAfrica2010',
     label: 'Mundial 2010 · Sudáfrica',
     url: 'https://facuca86.github.io/albumvirtual-2010/',
     style: 'southafrica2010',
+    totalStickers: 640,
   },
   {
     id: 'paniniGermany2006',
     label: 'Mundial 2006 · Alemania',
     url: 'https://facuca86.github.io/albumvirtual-2006/',
     style: 'germany2006',
+    totalStickers: 597,
   },
 ];
 
@@ -235,6 +242,7 @@ export default function PaniniAlbum2022() {
   const [repetidasSelected, setRepetidasSelected] = useState(new Set());
   const [repetidasPending, setRepetidasPending] = useState([]);
   const [repetidasConfirmSelected, setRepetidasConfirmSelected] = useState(false);
+  const [otrosProyectosProgress, setOtrosProyectosProgress] = useState({});
 
   // ── Load progress ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -288,6 +296,37 @@ export default function PaniniAlbum2022() {
     };
     loadDarkMode();
   }, []);
+
+  // ── Load progress of other projects (Otros Proyectos) ─────────────────────
+  useEffect(() => {
+    if (currentView !== 'otros-proyectos' || !db) return;
+    let cancelled = false;
+    const fetchProgress = async () => {
+      const progressData = {};
+      for (const proyecto of PROYECTOS) {
+        if (proyecto.id === albumConfig.id) continue;
+        try {
+          const snap = await getDoc(doc(db, 'albumProgress', proyecto.id));
+          if (snap.exists()) {
+            const stickers = snap.data()?.stickers || {};
+            const pegadas = Object.values(stickers).filter(v => v === true || v === 'repeated').length;
+            progressData[proyecto.id] = {
+              pegadas,
+              total: proyecto.totalStickers,
+              pct: Math.round((pegadas / proyecto.totalStickers) * 100),
+            };
+          } else {
+            progressData[proyecto.id] = null;
+          }
+        } catch (_) {
+          progressData[proyecto.id] = null;
+        }
+      }
+      if (!cancelled) setOtrosProyectosProgress(progressData);
+    };
+    fetchProgress();
+    return () => { cancelled = true; };
+  }, [currentView]);
 
   // ── Load progress history ─────────────────────────────────────────────────
   useEffect(() => {
@@ -927,6 +966,7 @@ export default function PaniniAlbum2022() {
             <div className="flex flex-col gap-6">
               {PROYECTOS.filter(p => p.id !== albumConfig.id).map(proyecto => {
                 const btnStyle = getProyectoStyle(proyecto.style);
+                const progress = otrosProyectosProgress[proyecto.id];
                 return (
                   <button
                     key={proyecto.id}
@@ -935,10 +975,40 @@ export default function PaniniAlbum2022() {
                     className="rounded-3xl p-8 shadow-xl text-left active:scale-95 transition-transform w-full font-black"
                   >
                     <div className="text-3xl font-black italic uppercase">{proyecto.label}</div>
+                    {progress === undefined ? (
+                      <div style={{ marginTop: 6 }}>
+                        <div style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden' }} />
+                        <div style={{ fontSize: 11, marginTop: 3, opacity: 0.7, textAlign: 'right' }}>cargando...</div>
+                      </div>
+                    ) : progress && (
+                      <div style={{ marginTop: 6 }}>
+                        <div style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${progress.pct}%`, backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 2, transition: 'width 0.6s ease' }} />
+                        </div>
+                        <div style={{ fontSize: 11, marginTop: 3, opacity: 0.85, textAlign: 'right' }}>
+                          {progress.pct}% · {progress.pegadas} pegadas
+                        </div>
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
+            {(() => {
+              const entries = Object.values(otrosProyectosProgress).filter(Boolean);
+              if (entries.length === 0) return null;
+              const totalPegadas = entries.reduce((sum, p) => sum + p.pegadas, 0);
+              const totalFaltantes = entries.reduce((sum, p) => sum + (p.total - p.pegadas), 0);
+              const totalStickersOtros = PROYECTOS
+                .filter(p => p.id !== albumConfig.id && otrosProyectosProgress[p.id])
+                .reduce((sum, p) => sum + p.totalStickers, 0);
+              const promedio = totalStickersOtros > 0 ? Math.round((totalPegadas / totalStickersOtros) * 100) : 0;
+              return (
+                <div className={`mt-6 px-4 py-2.5 rounded-xl text-xs leading-relaxed ${darkMode ? 'bg-white/5 text-white/70' : 'bg-black/5 text-slate-600'}`}>
+                  * Colección completa · {promedio}% promedio · {totalPegadas.toLocaleString()} figuritas pegadas · {totalFaltantes.toLocaleString()} faltantes
+                </div>
+              );
+            })()}
             <button
               onClick={() => setCurrentView('home')}
               className={`mt-6 px-6 py-3 rounded-2xl font-black transition-colors duration-300 ${darkMode ? 'bg-[#2a2a4a] text-white' : 'bg-gray-200 text-gray-800'}`}
